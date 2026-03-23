@@ -21,14 +21,18 @@ RUN curl -fsSL https://claude.ai/install.sh | bash \
 
 ENV PATH="/home/claude/.local/bin:$PATH"
 
-# ~/.claude/  — credentials, settings, project memory, keybindings
-# ~/.claude.json is a file (OAuth/global state); bind-mount it separately at runtime
-VOLUME ["/home/claude/.claude"]
-
 USER root
 COPY docker/claude-code-entrypoint.sh /claude-code-entrypoint.sh
 RUN chmod +x /claude-code-entrypoint.sh
 
+# Copy skills directory
+COPY skills /home/claude/.claude/skills/
+RUN chown -R claude:claude /home/claude/.claude/skills/
+
 USER claude
+
+# ~/.claude/  — credentials, settings, project memory, keybindings
+# ~/.claude.json is a file (OAuth/global state); bind-mount it separately at runtime
+VOLUME ["/home/claude/.claude"]
 
 ENTRYPOINT ["/claude-code-entrypoint.sh"]
