@@ -23,12 +23,13 @@ RUN curl -fsSL https://claude.ai/install.sh | bash \
 ENV PATH="/home/claude/.local/bin:$PATH"
 
 USER root
-COPY docker/claude-code-entrypoint.sh /claude-code-entrypoint.sh
-RUN chmod +x /claude-code-entrypoint.sh
+COPY --chmod=0555 docker/claude-code-entrypoint.sh /claude-code-entrypoint.sh
+COPY --chmod=0444 ssl-certs/* /usr/local/share/ca-certificates/
+
+RUN update-ca-certificates
 
 # Copy skills directory
-COPY skills /home/claude/.claude/skills/
-RUN chown -R claude:claude /home/claude/.claude/skills/
+COPY --chown=claude:claude skills /home/claude/.claude/skills/
 
 USER claude
 

@@ -1,0 +1,1 @@
+Place any extra SSL certificates in this folder that are needed to connect with outside services. For example, some companies use tools like ZScaler for network protection which require you to add a root certificate.
