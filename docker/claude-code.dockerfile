@@ -5,7 +5,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     curl \
     ca-certificates \
-    sudo
+    sudo \
+    git
 
 # Install Node.js 22.x (required by Claude Code)
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
