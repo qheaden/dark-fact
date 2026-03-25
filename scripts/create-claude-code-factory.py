@@ -32,6 +32,10 @@ def main():
     workspace_path = os.path.abspath(args.workspace_path)
     claude_json_path = os.path.abspath(args.claude_json)
 
+    if not os.path.exists(workspace_path):
+        print(f"Creating workspace directory at {workspace_path}")
+        os.makedirs(workspace_path)
+
     if not os.path.exists(claude_json_path):
         print(f"Creating empty claude JSON file at {claude_json_path}")
         with open(claude_json_path, "w") as f:
@@ -48,8 +52,9 @@ def main():
         "--allow-dangerously-skip-permissions",
     ]
 
-    print(f"Running: {' '.join(cmd)}")
     result = subprocess.run(cmd)
+    if result.returncode == 0:
+        print(f"Container created. Run it with: docker start -ia {args.name}")
     sys.exit(result.returncode)
 
 
