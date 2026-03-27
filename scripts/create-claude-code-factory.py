@@ -27,10 +27,22 @@ def main():
         default=DEFAULT_CLAUDE_JSON,
         help="Path to the claude JSON data file holding login info (default: ../claude-code-factory.json relative to this script).",
     )
+    parser.add_argument(
+        "--skills-dir",
+        default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "skills"),
+        help="Path to the skills directory to mount into the container (default: ../skills relative to this script).",
+    )
+    parser.add_argument(
+        "--port",
+        action="append",
+        dest="ports",
+        help="Port mapping for the container (e.g., 8000:8000). Can be used multiple times.",
+    )
     args = parser.parse_args()
 
     workspace_path = os.path.abspath(args.workspace_path)
     claude_json_path = os.path.abspath(args.claude_json)
+    skills_dir_path = os.path.abspath(args.skills_dir)
 
     if not os.path.exists(workspace_path):
         print(f"Creating workspace directory at {workspace_path}")
@@ -46,11 +58,16 @@ def main():
         "--name", args.name,
         "-v", f"{workspace_path}:/workspace",
         "-v", f"{claude_json_path}:/home/claude/.claude.json",
+        "-v", f"{skills_dir_path}:/home/claude/.claude/skills",
         "-v", "dark-fact-claude-code-data:/home/claude/.claude",
         "-i", "-t",
         "df-claude-code",
         "--allow-dangerously-skip-permissions",
     ]
+
+    if args.ports:
+        for port in args.ports:
+            cmd.extend(["-p", port])
 
     result = subprocess.run(cmd)
     if result.returncode == 0:
