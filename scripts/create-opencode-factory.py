@@ -49,6 +49,12 @@ def main():
         dest="ports",
         help="Port mapping for the container (e.g., 8000:8000). Can be used multiple times.",
     )
+    parser.add_argument(
+        "--dns",
+        action="append",
+        dest="dns_servers",
+        help="DNS server to use for the container (e.g., 8.8.8.8). Can be used multiple times.",
+    )
     args = parser.parse_args()
 
     workspace_path = os.path.abspath(args.workspace_path)
@@ -86,6 +92,10 @@ def main():
     if args.ports:
         for port in args.ports:
             cmd.extend(["-p", port])
+
+    if args.dns_servers:
+        for dns_server in args.dns_servers:
+            cmd.extend(["--dns", dns_server])
 
     cmd.append("df-opencode")
 
