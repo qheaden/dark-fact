@@ -67,8 +67,6 @@ def main():
         "-v", f"{skills_dir_path}:/home/claude/.claude/skills",
         "-v", "dark-fact-claude-code-data:/home/claude/.claude",
         "-i", "-t",
-        "df-claude-code",
-        "--allow-dangerously-skip-permissions",
     ]
 
     if args.ports:
@@ -78,6 +76,11 @@ def main():
     if args.dns_servers:
         for dns_server in args.dns_servers:
             cmd.extend(["--dns", dns_server])
+
+    cmd.extend([
+        "df-claude-code",
+        "--allow-dangerously-skip-permissions",
+    ])
 
     result = subprocess.run(cmd)
     if result.returncode == 0:
