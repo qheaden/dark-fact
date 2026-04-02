@@ -29,20 +29,15 @@ if [ ! -d /workspace ]; then
     exit 1
 fi
 
-# Write permissive config if none is present — equivalent to --allow-dangerously-skip-permissions
+# Check for opencode config file
 CONFIG="/home/opencode/.config/opencode/opencode.json"
 if [ ! -f "$CONFIG" ]; then
-    mkdir -p "$(dirname "$CONFIG")"
-    cat > "$CONFIG" <<'CONF'
-{
-  "permission": {
-    "*": "allow",
-    "doom_loop": "allow",
-    "external_directory": "allow"
-  }
-}
-CONF
+    echo "Error: /home/opencode/.config/opencode/opencode.json is not mounted." >&2
+    echo "Mount your OpenCode config file with: -v /path/to/opencode.json:/home/opencode/.config/opencode/opencode.json" >&2
+    exit 1
 fi
+
+
 
 cd /workspace
 

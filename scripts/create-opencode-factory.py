@@ -74,9 +74,24 @@ def main():
 
     config_json_path = os.path.abspath(args.config_json)
     if not os.path.exists(config_json_path):
-        print(f"Creating empty config JSON file at {config_json_path}")
+        print(f"Creating default config JSON file at {config_json_path}")
+        default_config = """{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "*": "allow",
+    "doom_loop": "allow",
+    "external_directory": "allow"
+  },
+  "agent": {
+    "plan": {
+      "permission": {
+        "edit": "deny"
+      }
+    }
+  }
+}"""
         with open(config_json_path, "w") as f:
-            f.write("{}\n")
+            f.write(default_config)
 
     cmd = [
         "docker", "create",
