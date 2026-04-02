@@ -7,8 +7,9 @@ import sys
 
 
 
-DEFAULT_AUTH_JSON = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "opencode-factory-auth.json")
-DEFAULT_CONFIG_JSON = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "opencode-factory.json")
+DEFAULT_CONFIG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "configs")
+DEFAULT_AUTH_JSON = os.path.join(DEFAULT_CONFIG_DIR, "opencode-factory-auth.json")
+DEFAULT_CONFIG_JSON = os.path.join(DEFAULT_CONFIG_DIR, "opencode-factory.json")
 DEFAULT_SKILLS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "skills")
 
 def main():

@@ -7,7 +7,8 @@ import sys
 
 
 
-DEFAULT_CLAUDE_JSON = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "claude-code-factory.json")
+DEFAULT_CONFIG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "configs")
+DEFAULT_CLAUDE_JSON = os.path.join(DEFAULT_CONFIG_DIR, "claude-code-factory.json")
 
 
 def main():
