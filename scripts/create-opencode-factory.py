@@ -8,6 +8,7 @@ import sys
 
 
 DEFAULT_AUTH_JSON = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "opencode-factory-auth.json")
+DEFAULT_CONFIG_JSON = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "opencode-factory.json")
 DEFAULT_SKILLS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "skills")
 
 def main():
@@ -34,8 +35,8 @@ def main():
     )
     parser.add_argument(
         "--config-json",
-        default=None,
-        help="Path to a custom opencode.json config file to mount (optional; auto-generated with permissive settings if omitted).",
+        default=DEFAULT_CONFIG_JSON,
+        help="Path to the opencode JSON config file to mount (default: ../opencode-factory.json relative to this script).",
     )
     parser.add_argument(
         "--env",
@@ -70,6 +71,12 @@ def main():
         with open(auth_json_path, "w") as f:
             f.write("{}\n")
 
+    config_json_path = os.path.abspath(args.config_json)
+    if not os.path.exists(config_json_path):
+        print(f"Creating empty config JSON file at {config_json_path}")
+        with open(config_json_path, "w") as f:
+            f.write("{}\n")
+
     cmd = [
         "docker", "create",
         "--name", args.name,
@@ -81,9 +88,7 @@ def main():
         "-i", "-t",
     ]
 
-    if args.config_json:
-        config_json_path = os.path.abspath(args.config_json)
-        cmd.extend(["-v", f"{config_json_path}:/home/opencode/.config/opencode/opencode.json"])
+    cmd.extend(["-v", f"{config_json_path}:/home/opencode/.config/opencode/opencode.json"])
 
     if args.env_vars:
         for env_var in args.env_vars:
