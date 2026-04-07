@@ -1,5 +1,5 @@
 group "default" {
-  targets = ["claude-code", "opencode"]
+  targets = ["claude-code", "opencode", "codex"]
 }
 
 target "claude-code" {
@@ -12,4 +12,10 @@ target "opencode" {
   context    = "."
   dockerfile = "docker/opencode.dockerfile"
   tags       = ["df-opencode"]
+}
+
+target "codex" {
+  context    = "."
+  dockerfile = "docker/codex.dockerfile"
+  tags       = ["df-codex"]
 }
