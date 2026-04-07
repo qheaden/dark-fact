@@ -8,9 +8,12 @@ RUN apt-get update && apt-get install -y \
     sudo \
     git
 
-# Install Node.js 22.x for Codex CLI
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
-    && apt-get install -y nodejs
+# Install Node.js 24 via nvm
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash \
+    && \. "$HOME/.nvm/nvm.sh" \
+    && nvm install 24 \
+    && ln -sf "$(dirname $(nvm which 24))" /usr/local/bin/node-bin
+ENV PATH="/usr/local/bin/node-bin:$PATH"
 
 RUN useradd -m -s /bin/bash codex \
     && echo "codex ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/codex
