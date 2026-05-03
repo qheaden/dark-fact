@@ -6,10 +6,11 @@ The term comes from manufacturing: a "dark factory" (or "lights-out factory") is
 
 > **Warning:** Fully autonomous coding agents can be dangerous even inside a container. A compromised or misbehaving agent can still make outbound network requests, exfiltrate data, or interact with external services. This repo does not implement any network filtering — that is your responsibility. Consider pairing these containers with a network firewall or egress proxy appropriate for your threat model.
 
-Three agent runtimes are supported:
+Four agent runtimes are supported:
 - **Claude Code** — Anthropic's CLI coding agent
 - **OpenCode** — an open-source coding agent
 - **ChatGPT Codex** - OpenAI's CLI coding agent
+- **Pi** - Pi coding agent
 
 ## How It Works
 
@@ -165,6 +166,37 @@ docker start -ia my-codex-factory
 
 Codex launches inside the container in `/workspace` with `--yolo` pre-passed by the factory script for autonomous operation.
 
+## Building a Pi Dark Factory
+
+### 1. Model Configuration
+
+The script uses `configs/pi-models.json` as a user-editable file where you can define your custom providers and models. Note that built-in provider support is handled by the Pi agent separately, and this file is intended for your specific configuration overrides and extensions. If the file does not exist, it is created automatically as an empty configuration template.
+
+### 2. Create the container
+
+```bash
+python scripts/create-pi-factory.py /path/to/your/project \
+    --name my-pi-factory
+```
+
+**Options:**
+
+| Flag | Description |
+|------|-------------|
+| `workspace-path` | (required) Path to the project directory to mount as `/workspace` |
+| `--name` | (required) Name for the Docker container |
+| `--skills-dir` | Path to the skills directory (default: `skills/`) |
+| `--port` | Port mapping, e.g. `8000:8000`. Repeatable. |
+| `--dns` | DNS server for the container, e.g. `8.8.8.8`. Repeatable. |
+
+### 3. Start the factory
+
+```bash
+docker start -ia my-pi-factory
+```
+
+Pi launches inside the container in `/workspace`.
+
 ## Skills
 
 The `skills/` directory is mounted into every factory container. Any skill you add there is immediately available to the running agent — no container rebuild needed.
@@ -184,14 +216,18 @@ If your network requires custom root certificates (e.g. a corporate proxy like Z
 │   ├── codex.dockerfile             # Codex container image
 │   ├── claude-code-entrypoint.sh    # Validates auth + workspace, launches claude
 │   ├── opencode-entrypoint.sh       # Validates credentials, launches opencode
-│   └── codex-entrypoint.sh          # Validates workspace, launches codex
+│   ├── codex-entrypoint.sh          # Validates workspace, launches codex
+│   └── pi-entrypoint.sh             # Validates workspace, launches pi
 ├── scripts/
 │   ├── create-claude-code-factory.py  # Creates a Claude Code factory container
 │   ├── create-opencode-factory.py     # Creates an OpenCode factory container
-│   └── create-codex-factory.py        # Creates a Codex factory container
+│   ├── create-codex-factory.py        # Creates a Codex factory container
+│   └── create-pi-factory.py           # Creates a Pi factory container
 ├── skills/                          # Custom skills mounted into every container
 ├── ssl-certs/                       # Extra SSL certificates for corporate networks
 ├── docker-bake.hcl                  # Buildx targets for all images
 ├── claude-code-factory.json         # Claude Code auth file (gitignored)
-└── opencode-factory-auth.json       # OpenCode auth file (gitignored)
+├── opencode-factory-auth.json       # OpenCode auth file (gitignored)
+└── configs/
+    └── pi-models.json               # Pi model configuration
 ```
