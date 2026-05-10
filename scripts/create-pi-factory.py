@@ -61,6 +61,7 @@ def main():
         "-v", f"{skills_dir_path}:/home/pi/.pi/agent/skills",
         "-v", f"{pi_models_json}:/home/pi/.pi/agent/models.json",
         "-v", "dark-fact-pi-data:/home/pi/.pi/agent",
+        "--add-host", "host.docker.local:host-gateway",
         "-i", "-t",
     ]
 

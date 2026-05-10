@@ -67,6 +67,7 @@ def main():
         "-v", f"{claude_json_path}:/home/claude/.claude.json",
         "-v", f"{skills_dir_path}:/home/claude/.claude/skills",
         "-v", "dark-fact-claude-code-data:/home/claude/.claude",
+        "--add-host", "host.docker.local:host-gateway",
         "-i", "-t",
     ]
 

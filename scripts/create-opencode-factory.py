@@ -101,6 +101,7 @@ def main():
         "-v", f"{skills_dir_path}:/home/opencode/.config/opencode/skills",
         "-v", "dark-fact-opencode-config:/home/opencode/.config/opencode",
         "-v", "dark-fact-opencode-data:/home/opencode/.local/share/opencode",
+        "--add-host", "host.docker.local:host-gateway",
         "-i", "-t",
     ]
 

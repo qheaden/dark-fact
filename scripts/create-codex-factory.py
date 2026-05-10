@@ -58,6 +58,7 @@ def main():
         "-v", f"{workspace_path}:/workspace",
         "-v", f"{skills_dir_path}:/home/codex/.codex/skills",
         "-v", "dark-fact-codex-data:/home/codex/.codex",
+        "--add-host", "host.docker.local:host-gateway",
         "-i", "-t",
     ]
 
