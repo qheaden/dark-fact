@@ -21,4 +21,8 @@ fi
 
 cd /workspace
 
+if [ -f /home/claude/.env ]; then
+    source /home/claude/.env
+fi
+
 exec claude "$@"

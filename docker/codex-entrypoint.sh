@@ -15,4 +15,8 @@ fi
 
 cd /workspace
 
+if [ -f /home/codex/.env ]; then
+    source /home/codex/.env
+fi
+
 exec codex "$@"

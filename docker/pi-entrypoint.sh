@@ -15,4 +15,8 @@ fi
 
 cd /workspace
 
+if [ -f /home/pi/.env ]; then
+    source /home/pi/.env
+fi
+
 exec pi "$@"

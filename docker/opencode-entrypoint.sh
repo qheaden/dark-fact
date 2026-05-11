@@ -41,4 +41,8 @@ fi
 
 cd /workspace
 
+if [ -f /home/opencode/.env ]; then
+    source /home/opencode/.env
+fi
+
 exec opencode "$@"
