@@ -19,7 +19,7 @@ RUN useradd -m -s /bin/bash pi \
     && echo "pi ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/pi
 
 # Install Pi coding agent
-RUN npm install -g @mariozechner/pi-coding-agent
+RUN npm install -g @earendil-works/pi-coding-agent
 
 USER root
 COPY --chmod=0555 docker/pi-entrypoint.sh /pi-entrypoint.sh
