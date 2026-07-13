@@ -11,11 +11,13 @@ has_auth=0
 [ -n "$OPENAI_API_KEY" ] && has_auth=1
 
 if [ "$has_auth" -eq 0 ]; then
-    echo "Error: No API credentials configured." >&2
-    echo "Either populate ${AUTH_JSON} with authentication data, or pass an API key:" >&2
-    echo "  -e ANTHROPIC_API_KEY=sk-ant-..." >&2
-    echo "  -e OPENAI_API_KEY=sk-..." >&2
-    exit 1
+    echo "No API credentials configured. Starting the OpenCode login flow."
+    opencode auth login
+
+    if [ ! -f "$AUTH_JSON" ] || [ "$(wc -c < "$AUTH_JSON")" -le 2 ]; then
+        echo "Error: OpenCode login did not create credentials at ${AUTH_JSON}." >&2
+        exit 1
+    fi
 fi
 
 if [ -f /workspace ]; then
@@ -47,22 +49,25 @@ FACTORY_CONFIG="/kanban/factory.env"
 echo "Kanban worker started; watching /kanban/2-ready-for-work for tickets."
 
 while true; do
+    sleep 10
+
     if [ ! -f "$FACTORY_CONFIG" ]; then
         echo "Error: Required factory configuration is missing: ${FACTORY_CONFIG}. Waiting 10 seconds." >&2
-        sleep 10
         continue
     fi
 
     unset OPENCODE_MODEL OPENCODE_VARIANT
     if ! source "$FACTORY_CONFIG"; then
         echo "Error: Could not load factory configuration: ${FACTORY_CONFIG}. Waiting 10 seconds." >&2
-        sleep 10
         continue
     fi
 
+    # Factory configuration may be edited on Windows with CRLF line endings.
+    OPENCODE_MODEL="${OPENCODE_MODEL%$'\r'}"
+    OPENCODE_VARIANT="${OPENCODE_VARIANT%$'\r'}"
+
     if [ -z "$OPENCODE_MODEL" ] || [ -z "$OPENCODE_VARIANT" ]; then
         echo "Error: ${FACTORY_CONFIG} must define non-empty OPENCODE_MODEL and OPENCODE_VARIANT values. Waiting 10 seconds." >&2
-        sleep 10
         continue
     fi
 
@@ -70,7 +75,6 @@ while true; do
 
     if [ "${#tickets[@]}" -eq 0 ]; then
         echo "No tickets ready for work; checking again in 10 seconds."
-        sleep 10
         continue
     fi
 
@@ -89,6 +93,9 @@ while true; do
         mv -- "$in_progress_path" /kanban/4-in-review/
         echo "In review: /kanban/4-in-review/$(basename "$in_progress_path")"
     else
-        echo "OpenCode failed while processing ticket; leaving it in progress: ${in_progress_path}" >&2
+        echo "OpenCode failed while processing ticket; returning it to ready for work: ${in_progress_path}" >&2
+        mv -- "$in_progress_path" /kanban/2-ready-for-work/
+        echo "Ready for work: /kanban/2-ready-for-work/$(basename "$in_progress_path")"
+        echo "Retrying in 10 seconds."
     fi
 done

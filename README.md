@@ -68,6 +68,8 @@ docker start -ia my-dark-factory
 
 The factory watches `kanbans/my-dark-factory/2-ready-for-work/` for tickets. Each ticket is moved to `3-in-progress` while OpenCode works on it, then to `4-in-review` after OpenCode exits. The factory runs continuously; attach with `docker start -ia` to view its output.
 
+On the first attached start without API-key credentials, the factory launches the interactive `opencode auth login` flow. This supports subscription-based provider login. The resulting authentication is stored in the factory's persistent data volume, so later starts do not require login again.
+
 ## Kanban
 
 Creating a factory creates its board at `kanbans/<factory-name>/` with these states:
