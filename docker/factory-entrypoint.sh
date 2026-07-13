@@ -42,10 +42,30 @@ if [ -f /home/opencode/.env ]; then
 fi
 
 shopt -s nullglob
+FACTORY_CONFIG="/kanban/factory.env"
 
 echo "Kanban worker started; watching /kanban/2-ready-for-work for tickets."
 
 while true; do
+    if [ ! -f "$FACTORY_CONFIG" ]; then
+        echo "Error: Required factory configuration is missing: ${FACTORY_CONFIG}. Waiting 10 seconds." >&2
+        sleep 10
+        continue
+    fi
+
+    unset OPENCODE_MODEL OPENCODE_VARIANT
+    if ! source "$FACTORY_CONFIG"; then
+        echo "Error: Could not load factory configuration: ${FACTORY_CONFIG}. Waiting 10 seconds." >&2
+        sleep 10
+        continue
+    fi
+
+    if [ -z "$OPENCODE_MODEL" ] || [ -z "$OPENCODE_VARIANT" ]; then
+        echo "Error: ${FACTORY_CONFIG} must define non-empty OPENCODE_MODEL and OPENCODE_VARIANT values. Waiting 10 seconds." >&2
+        sleep 10
+        continue
+    fi
+
     tickets=(/kanban/2-ready-for-work/*.md)
 
     if [ "${#tickets[@]}" -eq 0 ]; then
@@ -60,15 +80,15 @@ while true; do
     echo "Ready for work: ${ticket_path}"
     mv -- "$ticket_path" "$in_progress_path"
     echo "In progress: ${in_progress_path}"
+    echo "Using model ${OPENCODE_MODEL} with variant ${OPENCODE_VARIANT}."
     echo "Writing OpenCode output to: ${worklog_path}"
 
-    if opencode run "Please implement the ticket in ${in_progress_path}. If the ticket has a task list, please implement each task one at a time." 2>&1 | tee "$worklog_path"; then
+    if opencode run --model "$OPENCODE_MODEL" --variant "$OPENCODE_VARIANT" "Please implement the ticket in ${in_progress_path}. If the ticket has a task list, please implement each task one at a time." 2>&1 | tee "$worklog_path"; then
         echo "Completed ticket: ${in_progress_path}"
+        echo "Moving ticket to review: ${in_progress_path}"
+        mv -- "$in_progress_path" /kanban/4-in-review/
+        echo "In review: /kanban/4-in-review/$(basename "$in_progress_path")"
     else
-        echo "OpenCode failed while processing ticket: ${in_progress_path}" >&2
+        echo "OpenCode failed while processing ticket; leaving it in progress: ${in_progress_path}" >&2
     fi
-
-    echo "Moving ticket to review: ${in_progress_path}"
-    mv -- "$in_progress_path" /kanban/4-in-review/
-    echo "In review: /kanban/4-in-review/$(basename "$in_progress_path")"
 done

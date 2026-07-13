@@ -79,6 +79,15 @@ Creating a factory creates its board at `kanbans/<factory-name>/` with these sta
 - `5-done`
 - `worklogs`
 
+Each board also contains a required `factory.env` configuration file:
+
+```bash
+OPENCODE_MODEL=provider/model
+OPENCODE_VARIANT=reasoning-level
+```
+
+Set both values before starting the factory. The worker reloads the file before each ticket, so changes apply to the next ticket without restarting the container. If the file is missing or either value is empty, the worker logs an error and waits until it is corrected.
+
 Create tickets from `TICKET-TEMPLATE.md`, then place them in `2-ready-for-work` for the factory to process. OpenCode output for each ticket is captured in `worklogs/` using the ticket filename with a `.log` extension. Factory kanbans and their tickets are ignored by Git.
 
 ## Skills

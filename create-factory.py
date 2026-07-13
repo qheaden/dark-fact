@@ -60,6 +60,11 @@ def main():
     ):
         os.makedirs(os.path.join(kanban_path, state), exist_ok=True)
 
+    config_path = os.path.join(kanban_path, "factory.env")
+    if not os.path.exists(config_path):
+        with open(config_path, "w", encoding="utf-8") as config_file:
+            config_file.write("OPENCODE_MODEL=\nOPENCODE_VARIANT=\n")
+
     volume_prefix = f"dark-factory-{args.name}"
 
     cmd = [
