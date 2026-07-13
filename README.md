@@ -47,7 +47,7 @@ This produces the local `dark-factory` image.
 ```bash
 python create-factory.py /path/to/your/project \
     --name my-dark-factory \
-    --env ANTHROPIC_API_KEY=sk-ant-...
+    --env MY_ENVIRONMENT_VARIABLE=value
 ```
 
 **Options:**
