@@ -15,7 +15,8 @@ RUN useradd -m -s /bin/bash opencode \
 USER opencode
 RUN curl -fsSL https://opencode.ai/install | bash
 
-ENV PATH="/home/opencode/.opencode/bin:$PATH"
+ENV PATH="/home/opencode/.opencode/bin:$PATH" \
+    OPENCODE_ENABLE_EXA=1
 
 USER root
 COPY --chmod=0555 docker/factory-entrypoint.sh /factory-entrypoint.sh
