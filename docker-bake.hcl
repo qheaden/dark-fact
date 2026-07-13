@@ -1,9 +1,9 @@
 group "default" {
-  targets = ["opencode"]
+  targets = ["factory"]
 }
 
-target "opencode" {
+target "factory" {
   context    = "."
-  dockerfile = "docker/opencode.dockerfile"
-  tags       = ["df-opencode"]
+  dockerfile = "docker/factory.dockerfile"
+  tags       = ["dark-factory"]
 }

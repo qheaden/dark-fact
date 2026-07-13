@@ -18,12 +18,12 @@ RUN curl -fsSL https://opencode.ai/install | bash
 ENV PATH="/home/opencode/.opencode/bin:$PATH"
 
 USER root
-COPY --chmod=0555 docker/opencode-entrypoint.sh /opencode-entrypoint.sh
+COPY --chmod=0555 docker/factory-entrypoint.sh /factory-entrypoint.sh
 COPY --chmod=0444 ssl-certs/* /usr/local/share/ca-certificates/
 
 RUN update-ca-certificates
 
-# Copy skills into OpenCode's global skills directory (bind-mounted at runtime to override)
+# Copy skills into the agent's global skills directory (bind-mounted at runtime to override)
 COPY --chown=opencode:opencode skills /home/opencode/.config/opencode/skills/
 
 USER opencode
@@ -39,4 +39,4 @@ RUN mkdir -p \
 VOLUME ["/home/opencode/.config/opencode"]
 VOLUME ["/home/opencode/.local/share/opencode"]
 
-ENTRYPOINT ["/opencode-entrypoint.sh"]
+ENTRYPOINT ["/factory-entrypoint.sh"]

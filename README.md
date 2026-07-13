@@ -1,12 +1,10 @@
 # Dark Fact
 
-A setup for running OpenCode autonomously as a **dark factory** of software development.
+A setup for running an autonomous coding agent as a **dark factory** of software development.
 
 The term comes from manufacturing: a "dark factory" (or "lights-out factory") is a fully automated production facility that operates without human presence. Dark Fact  applies the same idea to software — containerized AI coding agents that run autonomously on your codebase without requiring human approval at every step.
 
 > **Warning:** Fully autonomous coding agents can be dangerous even inside a container. A compromised or misbehaving agent can still make outbound network requests, exfiltrate data, or interact with external services. This repo does not implement any network filtering — that is your responsibility. Consider pairing these containers with a network firewall or egress proxy appropriate for your threat model.
-
-OpenCode is the supported coding agent.
 
 ## How It Works
 
@@ -15,7 +13,7 @@ Each dark factory is a Docker container that:
 1. Mounts a local workspace directory as `/workspace`
 2. Mounts credentials so the agent can authenticate
 3. Mounts a `skills/` directory so the agent has access to custom skills
-4. Starts OpenCode with a permissive configuration to bypass approval prompts
+4. Starts the agent with a permissive configuration to bypass approval prompts
 
 The agent runs interactively inside the container (`docker start -ia`), working autonomously on whatever task or prompt you give it. Because the workspace is a bind mount, all changes the agent makes are immediately visible on the host.
 
@@ -34,19 +32,19 @@ Build all images at once:
 docker buildx bake
 ```
 
-The OpenCode target can also be built explicitly:
+The factory target can also be built explicitly:
 
 ```bash
-docker buildx bake opencode
+docker buildx bake factory
 ```
 
-This produces the local `df-opencode` image.
+This produces the local `dark-factory` image.
 
-## Building an OpenCode Dark Factory
+## Building a Dark Factory
 
 ### 1. Credentials (optional)
 
-The script uses `configs/opencode-factory-auth.json` as the auth file by default. If it doesn't exist, it is created automatically as an empty file.
+The script uses `configs/factory-auth.json` as the auth file by default. If it doesn't exist, it is created automatically as an empty file.
 
 You can also pass API credentials directly via `--env` instead of using an auth file:
 
@@ -54,13 +52,13 @@ You can also pass API credentials directly via `--env` instead of using an auth 
 
 ```bash
 # Using an API key
-python scripts/create-opencode-factory.py /path/to/your/project \
-    --name my-opencode-factory \
+python scripts/create-factory.py /path/to/your/project \
+    --name my-dark-factory \
     --env ANTHROPIC_API_KEY=sk-ant-...
 
 # Using an auth file
-python scripts/create-opencode-factory.py /path/to/your/project \
-    --name my-opencode-factory
+python scripts/create-factory.py /path/to/your/project \
+    --name my-dark-factory
 ```
 
 **Options:**
@@ -69,19 +67,19 @@ python scripts/create-opencode-factory.py /path/to/your/project \
 |------|-------------|
 | `workspace-path` | (required) Path to the project directory to mount as `/workspace` |
 | `--name` | (required) Name for the Docker container |
-| `--auth-json` | Path to the OpenCode auth JSON file (default: `configs/opencode-factory-auth.json`) |
+| `--auth-json` | Path to the authentication JSON file (default: `configs/factory-auth.json`) |
 | `--skills-dir` | Path to the skills directory (default: `skills/`) |
-| `--config-json` | Path to a custom `opencode.json` config (auto-generated with permissive settings if omitted) |
+| `--config-json` | Path to a custom factory configuration file (auto-generated with permissive settings if omitted) |
 | `--env` | Environment variable, e.g. `ANTHROPIC_API_KEY=sk-...`. Repeatable. |
 | `--port` | Port mapping, e.g. `8000:8000`. Repeatable. |
 
 ### 3. Start the factory
 
 ```bash
-docker start -ia my-opencode-factory
+docker start -ia my-dark-factory
 ```
 
-OpenCode launches inside the container with full permissions pre-approved and working directory set to `/workspace`.
+The agent launches inside the container with full permissions pre-approved and working directory set to `/workspace`.
 
 ## Skills
 
@@ -97,14 +95,14 @@ If your network requires custom root certificates (e.g. a corporate proxy like Z
 
 ```
 ├── docker/
-│   ├── opencode.dockerfile          # OpenCode container image
-│   ├── opencode-entrypoint.sh       # Validates credentials, launches opencode
+│   ├── factory.dockerfile           # Factory container image
+│   ├── factory-entrypoint.sh        # Validates credentials and launches the agent
 ├── scripts/
-│   └── create-opencode-factory.py     # Creates an OpenCode factory container
+│   └── create-factory.py            # Creates a factory container
 ├── skills/                          # Custom skills mounted into every container
 ├── ssl-certs/                       # Extra SSL certificates for corporate networks
 ├── docker-bake.hcl                  # Buildx targets for all images
 └── configs/
-    ├── opencode-factory-auth.json   # OpenCode auth file (gitignored)
-    └── opencode-factory.json        # OpenCode configuration (gitignored)
+    ├── factory-auth.json            # Authentication file (gitignored)
+    └── factory-config.json          # Factory configuration (gitignored)
 ```

@@ -8,12 +8,12 @@ import sys
 
 
 DEFAULT_CONFIG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "configs")
-DEFAULT_AUTH_JSON = os.path.join(DEFAULT_CONFIG_DIR, "opencode-factory-auth.json")
-DEFAULT_CONFIG_JSON = os.path.join(DEFAULT_CONFIG_DIR, "opencode-factory.json")
+DEFAULT_AUTH_JSON = os.path.join(DEFAULT_CONFIG_DIR, "factory-auth.json")
+DEFAULT_CONFIG_JSON = os.path.join(DEFAULT_CONFIG_DIR, "factory-config.json")
 DEFAULT_SKILLS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "skills")
 
 def main():
-    parser = argparse.ArgumentParser(description="Launch an OpenCode factory container.")
+    parser = argparse.ArgumentParser(description="Create a dark factory container.")
     parser.add_argument(
         "workspace_path",
         metavar="workspace-path",
@@ -27,7 +27,7 @@ def main():
     parser.add_argument(
         "--auth-json",
         default=DEFAULT_AUTH_JSON,
-        help="Path to the OpenCode auth JSON file holding login info (default: ../opencode-factory-auth.json relative to this script).",
+        help="Path to the authentication JSON file (default: ../configs/factory-auth.json relative to this script).",
     )
     parser.add_argument(
         "--skills-dir",
@@ -37,7 +37,7 @@ def main():
     parser.add_argument(
         "--config-json",
         default=DEFAULT_CONFIG_JSON,
-        help="Path to the opencode JSON config file to mount (default: ../opencode-factory.json relative to this script).",
+        help="Path to the factory configuration JSON file (default: ../configs/factory-config.json relative to this script).",
     )
     parser.add_argument(
         "--env",
@@ -99,8 +99,8 @@ def main():
         "-v", f"{workspace_path}:/workspace",
         "-v", f"{auth_json_path}:/home/opencode/.local/share/opencode/auth.json",
         "-v", f"{skills_dir_path}:/home/opencode/.config/opencode/skills",
-        "-v", "dark-fact-opencode-config:/home/opencode/.config/opencode",
-        "-v", "dark-fact-opencode-data:/home/opencode/.local/share/opencode",
+        "-v", "dark-factory-config:/home/opencode/.config/opencode",
+        "-v", "dark-factory-data:/home/opencode/.local/share/opencode",
         "--add-host", "host.docker.local:host-gateway",
         "-i", "-t",
     ]
@@ -119,7 +119,7 @@ def main():
         for dns_server in args.dns_servers:
             cmd.extend(["--dns", dns_server])
 
-    cmd.append("df-opencode")
+    cmd.append("dark-factory")
 
     result = subprocess.run(cmd)
     if result.returncode == 0:

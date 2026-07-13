@@ -11,7 +11,7 @@ has_auth=0
 
 if [ "$has_auth" -eq 0 ]; then
     echo "Error: No API credentials configured." >&2
-    echo "Either populate ${AUTH_JSON} with your OpenCode auth data, or pass an API key:" >&2
+    echo "Either populate ${AUTH_JSON} with authentication data, or pass an API key:" >&2
     echo "  -e ANTHROPIC_API_KEY=sk-ant-..." >&2
     echo "  -e OPENAI_API_KEY=sk-..." >&2
     exit 1
@@ -29,16 +29,12 @@ if [ ! -d /workspace ]; then
     exit 1
 fi
 
-# Check for opencode config file
+# Check for the factory configuration file.
 CONFIG="/home/opencode/.config/opencode/opencode.json"
 if [ ! -f "$CONFIG" ]; then
-    echo "Error: /home/opencode/.config/opencode/opencode.json is not mounted." >&2
-    echo "Mount your OpenCode config file with: -v /path/to/opencode.json:/home/opencode/.config/opencode/opencode.json" >&2
+    echo "Error: The factory configuration file is not mounted." >&2
     exit 1
 fi
-
-
-
 cd /workspace
 
 if [ -f /home/opencode/.env ]; then
