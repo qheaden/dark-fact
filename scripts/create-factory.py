@@ -7,9 +7,6 @@ import sys
 
 
 
-DEFAULT_CONFIG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "configs")
-DEFAULT_AUTH_JSON = os.path.join(DEFAULT_CONFIG_DIR, "factory-auth.json")
-DEFAULT_CONFIG_JSON = os.path.join(DEFAULT_CONFIG_DIR, "factory-config.json")
 DEFAULT_SKILLS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "skills")
 
 def main():
@@ -25,19 +22,9 @@ def main():
         help="Name of the Docker container to create.",
     )
     parser.add_argument(
-        "--auth-json",
-        default=DEFAULT_AUTH_JSON,
-        help="Path to the authentication JSON file (default: ../configs/factory-auth.json relative to this script).",
-    )
-    parser.add_argument(
         "--skills-dir",
         default=DEFAULT_SKILLS_DIR,
         help="Path to the skills directory to mount into the container (default: ../skills relative to this script).",
-    )
-    parser.add_argument(
-        "--config-json",
-        default=DEFAULT_CONFIG_JSON,
-        help="Path to the factory configuration JSON file (default: ../configs/factory-config.json relative to this script).",
     )
     parser.add_argument(
         "--env",
@@ -60,52 +47,24 @@ def main():
     args = parser.parse_args()
 
     workspace_path = os.path.abspath(args.workspace_path)
-    auth_json_path = os.path.abspath(args.auth_json)
     skills_dir_path = os.path.abspath(args.skills_dir)
 
     if not os.path.exists(workspace_path):
         print(f"Creating workspace directory at {workspace_path}")
         os.makedirs(workspace_path)
 
-    if not os.path.exists(auth_json_path):
-        print(f"Creating empty auth JSON file at {auth_json_path}")
-        with open(auth_json_path, "w") as f:
-            f.write("{}\n")
-
-    config_json_path = os.path.abspath(args.config_json)
-    if not os.path.exists(config_json_path):
-        print(f"Creating default config JSON file at {config_json_path}")
-        default_config = """{
-  "$schema": "https://opencode.ai/config.json",
-  "permission": {
-    "*": "allow",
-    "doom_loop": "allow",
-    "external_directory": "allow"
-  },
-  "agent": {
-    "plan": {
-      "permission": {
-        "edit": "deny"
-      }
-    }
-  }
-}"""
-        with open(config_json_path, "w") as f:
-            f.write(default_config)
+    volume_prefix = f"dark-factory-{args.name}"
 
     cmd = [
         "docker", "create",
         "--name", args.name,
         "-v", f"{workspace_path}:/workspace",
-        "-v", f"{auth_json_path}:/home/opencode/.local/share/opencode/auth.json",
         "-v", f"{skills_dir_path}:/home/opencode/.config/opencode/skills",
-        "-v", "dark-factory-config:/home/opencode/.config/opencode",
-        "-v", "dark-factory-data:/home/opencode/.local/share/opencode",
+        "-v", f"{volume_prefix}-config:/home/opencode/.config/opencode",
+        "-v", f"{volume_prefix}-data:/home/opencode/.local/share/opencode",
         "--add-host", "host.docker.local:host-gateway",
         "-i", "-t",
     ]
-
-    cmd.extend(["-v", f"{config_json_path}:/home/opencode/.config/opencode/opencode.json"])
 
     if args.env_vars:
         for env_var in args.env_vars:

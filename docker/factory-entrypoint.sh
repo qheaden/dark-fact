@@ -29,12 +29,6 @@ if [ ! -d /workspace ]; then
     exit 1
 fi
 
-# Check for the factory configuration file.
-CONFIG="/home/opencode/.config/opencode/opencode.json"
-if [ ! -f "$CONFIG" ]; then
-    echo "Error: The factory configuration file is not mounted." >&2
-    exit 1
-fi
 cd /workspace
 
 if [ -f /home/opencode/.env ]; then

@@ -11,13 +11,13 @@ The term comes from manufacturing: a "dark factory" (or "lights-out factory") is
 Each dark factory is a Docker container that:
 
 1. Mounts a local workspace directory as `/workspace`
-2. Mounts credentials so the agent can authenticate
+2. Stores credentials and configuration in persistent container volumes
 3. Mounts a `skills/` directory so the agent has access to custom skills
 4. Starts the agent with a permissive configuration to bypass approval prompts
 
 The agent runs interactively inside the container (`docker start -ia`), working autonomously on whatever task or prompt you give it. Because the workspace is a bind mount, all changes the agent makes are immediately visible on the host.
 
-Named Docker volumes persist agent state (installed tools, cached data, config) across container restarts.
+Named Docker volumes persist each factory's agent state, credentials, and configuration across restarts.
 
 ## Prerequisites
 
@@ -42,23 +42,12 @@ This produces the local `dark-factory` image.
 
 ## Building a Dark Factory
 
-### 1. Credentials (optional)
-
-The script uses `configs/factory-auth.json` as the auth file by default. If it doesn't exist, it is created automatically as an empty file.
-
-You can also pass API credentials directly via `--env` instead of using an auth file:
-
-### 2. Create the container
+## Create a Factory
 
 ```bash
-# Using an API key
 python scripts/create-factory.py /path/to/your/project \
     --name my-dark-factory \
     --env ANTHROPIC_API_KEY=sk-ant-...
-
-# Using an auth file
-python scripts/create-factory.py /path/to/your/project \
-    --name my-dark-factory
 ```
 
 **Options:**
@@ -67,13 +56,11 @@ python scripts/create-factory.py /path/to/your/project \
 |------|-------------|
 | `workspace-path` | (required) Path to the project directory to mount as `/workspace` |
 | `--name` | (required) Name for the Docker container |
-| `--auth-json` | Path to the authentication JSON file (default: `configs/factory-auth.json`) |
 | `--skills-dir` | Path to the skills directory (default: `skills/`) |
-| `--config-json` | Path to a custom factory configuration file (auto-generated with permissive settings if omitted) |
 | `--env` | Environment variable, e.g. `ANTHROPIC_API_KEY=sk-...`. Repeatable. |
 | `--port` | Port mapping, e.g. `8000:8000`. Repeatable. |
 
-### 3. Start the factory
+## Start the Factory
 
 ```bash
 docker start -ia my-dark-factory
@@ -101,8 +88,5 @@ If your network requires custom root certificates (e.g. a corporate proxy like Z
 │   └── create-factory.py            # Creates a factory container
 ├── skills/                          # Custom skills mounted into every container
 ├── ssl-certs/                       # Extra SSL certificates for corporate networks
-├── docker-bake.hcl                  # Buildx targets for all images
-└── configs/
-    ├── factory-auth.json            # Authentication file (gitignored)
-    └── factory-config.json          # Factory configuration (gitignored)
+└── docker-bake.hcl                  # Buildx targets for the factory image
 ```

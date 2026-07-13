@@ -20,6 +20,7 @@ ENV PATH="/home/opencode/.opencode/bin:$PATH"
 USER root
 COPY --chmod=0555 docker/factory-entrypoint.sh /factory-entrypoint.sh
 COPY --chmod=0444 ssl-certs/* /usr/local/share/ca-certificates/
+COPY --chown=opencode:opencode docker/opencode-config.json /home/opencode/.config/opencode/opencode.json
 
 RUN update-ca-certificates
 
@@ -28,8 +29,8 @@ COPY --chown=opencode:opencode skills /home/opencode/.config/opencode/skills/
 
 USER opencode
 
-# Make the directories ahead of time so they are owned by the opencode user and not root
-# when the volumes are mounted.
+# Make the directories and default configuration ahead of time so they are owned by the
+# agent user and copied into a newly created volume.
 RUN mkdir -p \
     /home/opencode/.config/opencode \
     /home/opencode/.local/share/opencode
