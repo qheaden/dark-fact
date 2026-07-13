@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -o pipefail
 
 AUTH_JSON="/home/opencode/.local/share/opencode/auth.json"
 
@@ -29,10 +30,45 @@ if [ ! -d /workspace ]; then
     exit 1
 fi
 
+if [ ! -d /kanban ]; then
+    echo "Error: /kanban is not mounted." >&2
+    exit 1
+fi
+
 cd /workspace
 
 if [ -f /home/opencode/.env ]; then
     source /home/opencode/.env
 fi
 
-exec opencode "$@"
+shopt -s nullglob
+
+echo "Kanban worker started; watching /kanban/2-ready-for-work for tickets."
+
+while true; do
+    tickets=(/kanban/2-ready-for-work/*.md)
+
+    if [ "${#tickets[@]}" -eq 0 ]; then
+        echo "No tickets ready for work; checking again in 10 seconds."
+        sleep 10
+        continue
+    fi
+
+    ticket_path="${tickets[0]}"
+    in_progress_path="/kanban/3-in-progress/$(basename "$ticket_path")"
+    worklog_path="/kanban/worklogs/$(basename "${in_progress_path%.md}").log"
+    echo "Ready for work: ${ticket_path}"
+    mv -- "$ticket_path" "$in_progress_path"
+    echo "In progress: ${in_progress_path}"
+    echo "Writing OpenCode output to: ${worklog_path}"
+
+    if opencode run "Please implement the ticket in ${in_progress_path}. If the ticket has a task list, please implement each task one at a time." 2>&1 | tee "$worklog_path"; then
+        echo "Completed ticket: ${in_progress_path}"
+    else
+        echo "OpenCode failed while processing ticket: ${in_progress_path}" >&2
+    fi
+
+    echo "Moving ticket to review: ${in_progress_path}"
+    mv -- "$in_progress_path" /kanban/4-in-review/
+    echo "In review: /kanban/4-in-review/$(basename "$in_progress_path")"
+done

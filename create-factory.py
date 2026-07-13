@@ -8,6 +8,7 @@ import sys
 
 
 SHARED_SKILLS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "shared-skills")
+KANBANS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kanbans")
 
 def main():
     parser = argparse.ArgumentParser(description="Create a dark factory container.")
@@ -43,10 +44,21 @@ def main():
 
     workspace_path = os.path.abspath(args.workspace_path)
     skills_dir_path = os.path.abspath(SHARED_SKILLS_DIR)
+    kanban_path = os.path.join(KANBANS_DIR, args.name)
 
     if not os.path.exists(workspace_path):
         print(f"Creating workspace directory at {workspace_path}")
         os.makedirs(workspace_path)
+
+    for state in (
+        "1-planning",
+        "2-ready-for-work",
+        "3-in-progress",
+        "4-in-review",
+        "5-done",
+        "worklogs",
+    ):
+        os.makedirs(os.path.join(kanban_path, state), exist_ok=True)
 
     volume_prefix = f"dark-factory-{args.name}"
 
@@ -54,6 +66,7 @@ def main():
         "docker", "create",
         "--name", args.name,
         "-v", f"{workspace_path}:/workspace",
+        "-v", f"{kanban_path}:/kanban",
         "-v", f"{skills_dir_path}:/home/opencode/.config/opencode/skills",
         "-v", f"{volume_prefix}-config:/home/opencode/.config/opencode",
         "-v", f"{volume_prefix}-data:/home/opencode/.local/share/opencode",
