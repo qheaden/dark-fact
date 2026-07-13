@@ -45,7 +45,7 @@ This produces the local `dark-factory` image.
 ## Create a Factory
 
 ```bash
-python scripts/create-factory.py /path/to/your/project \
+python create-factory.py /path/to/your/project \
     --name my-dark-factory \
     --env ANTHROPIC_API_KEY=sk-ant-...
 ```
@@ -83,8 +83,7 @@ If your network requires custom root certificates (e.g. a corporate proxy like Z
 ├── docker/
 │   ├── factory.dockerfile           # Factory container image
 │   ├── factory-entrypoint.sh        # Validates credentials and launches the agent
-├── scripts/
-│   └── create-factory.py            # Creates a factory container
+├── create-factory.py                # Creates a factory container
 ├── shared-skills/                   # Custom skills mounted into every container
 ├── ssl-certs/                       # Extra SSL certificates for corporate networks
 └── docker-bake.hcl                  # Buildx targets for the factory image

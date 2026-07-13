@@ -7,7 +7,7 @@ import sys
 
 
 
-SHARED_SKILLS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "shared-skills")
+SHARED_SKILLS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "shared-skills")
 
 def main():
     parser = argparse.ArgumentParser(description="Create a dark factory container.")
