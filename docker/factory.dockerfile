@@ -8,6 +8,10 @@ RUN apt-get update && apt-get install -y \
     sudo \
     git
 
+COPY --chmod=0444 ssl-certs/* /usr/local/share/ca-certificates/
+
+RUN update-ca-certificates
+
 RUN useradd -m -s /bin/bash opencode \
     && echo "opencode ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/opencode
 
@@ -20,10 +24,7 @@ ENV PATH="/home/opencode/.opencode/bin:$PATH" \
 
 USER root
 COPY --chmod=0555 docker/factory-entrypoint.sh /factory-entrypoint.sh
-COPY --chmod=0444 ssl-certs/* /usr/local/share/ca-certificates/
 COPY --chown=opencode:opencode docker/opencode-config.json /home/opencode/.config/opencode/opencode.json
-
-RUN update-ca-certificates
 
 USER opencode
 
