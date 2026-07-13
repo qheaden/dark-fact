@@ -24,9 +24,6 @@ COPY --chown=opencode:opencode docker/opencode-config.json /home/opencode/.confi
 
 RUN update-ca-certificates
 
-# Copy skills into the agent's global skills directory (bind-mounted at runtime to override)
-COPY --chown=opencode:opencode skills /home/opencode/.config/opencode/skills/
-
 USER opencode
 
 # Make the directories and default configuration ahead of time so they are owned by the

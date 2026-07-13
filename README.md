@@ -12,7 +12,7 @@ Each dark factory is a Docker container that:
 
 1. Mounts a local workspace directory as `/workspace`
 2. Stores credentials and configuration in persistent container volumes
-3. Mounts a `skills/` directory so the agent has access to custom skills
+3. Mounts a `shared-skills/` directory so the agent has access to custom skills
 4. Starts the agent with a permissive configuration to bypass approval prompts
 
 The agent runs interactively inside the container (`docker start -ia`), working autonomously on whatever task or prompt you give it. Because the workspace is a bind mount, all changes the agent makes are immediately visible on the host.
@@ -56,7 +56,6 @@ python scripts/create-factory.py /path/to/your/project \
 |------|-------------|
 | `workspace-path` | (required) Path to the project directory to mount as `/workspace` |
 | `--name` | (required) Name for the Docker container |
-| `--skills-dir` | Path to the skills directory (default: `skills/`) |
 | `--env` | Environment variable, e.g. `ANTHROPIC_API_KEY=sk-...`. Repeatable. |
 | `--port` | Port mapping, e.g. `8000:8000`. Repeatable. |
 
@@ -70,9 +69,9 @@ The agent launches inside the container with full permissions pre-approved and w
 
 ## Skills
 
-The `skills/` directory is mounted into every factory container. Any skill you add there is immediately available to the running agent — no container rebuild needed.
+The `shared-skills/` directory is mounted into every factory container. Any skill you add there is immediately available to all factories without rebuilding their images.
 
-See `skills/README.md` for details.
+See `shared-skills/README.md` for details.
 
 ## SSL Certificates
 
@@ -86,7 +85,7 @@ If your network requires custom root certificates (e.g. a corporate proxy like Z
 │   ├── factory-entrypoint.sh        # Validates credentials and launches the agent
 ├── scripts/
 │   └── create-factory.py            # Creates a factory container
-├── skills/                          # Custom skills mounted into every container
+├── shared-skills/                   # Custom skills mounted into every container
 ├── ssl-certs/                       # Extra SSL certificates for corporate networks
 └── docker-bake.hcl                  # Buildx targets for the factory image
 ```

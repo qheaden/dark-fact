@@ -7,7 +7,7 @@ import sys
 
 
 
-DEFAULT_SKILLS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "skills")
+SHARED_SKILLS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "shared-skills")
 
 def main():
     parser = argparse.ArgumentParser(description="Create a dark factory container.")
@@ -20,11 +20,6 @@ def main():
         "--name",
         required=True,
         help="Name of the Docker container to create.",
-    )
-    parser.add_argument(
-        "--skills-dir",
-        default=DEFAULT_SKILLS_DIR,
-        help="Path to the skills directory to mount into the container (default: ../skills relative to this script).",
     )
     parser.add_argument(
         "--env",
@@ -47,7 +42,7 @@ def main():
     args = parser.parse_args()
 
     workspace_path = os.path.abspath(args.workspace_path)
-    skills_dir_path = os.path.abspath(args.skills_dir)
+    skills_dir_path = os.path.abspath(SHARED_SKILLS_DIR)
 
     if not os.path.exists(workspace_path):
         print(f"Creating workspace directory at {workspace_path}")
