@@ -90,6 +90,8 @@ OPENCODE_VARIANT=reasoning-level
 
 Set both values before starting the factory. The worker reloads the file before each ticket, so changes apply to the next ticket without restarting the container. If the file is missing or either value is empty, the worker logs an error and waits until it is corrected.
 
+Each board also gets an `on-ticket-transition.sh` script for custom actions such as webhook notifications. After every transition performed by the worker, it runs the script with the ticket's new path as the first argument and its new state (`in-progress`, `in-review`, or `ready-for-work`) as the second argument. The script is optional at runtime; if it is removed, the worker continues normally. A hook failure is logged as a warning and does not stop ticket processing.
+
 Create tickets from `TICKET-TEMPLATE.md`, then place them in `2-ready-for-work` for the factory to process. OpenCode output for each ticket is captured in `worklogs/` using the ticket filename with a `.log` extension. Factory kanbans and their tickets are ignored by Git.
 
 ## Skills

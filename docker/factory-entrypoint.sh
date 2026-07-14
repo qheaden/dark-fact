@@ -45,6 +45,16 @@ fi
 
 shopt -s nullglob
 FACTORY_CONFIG="/kanban/factory.env"
+TRANSITION_HOOK="/kanban/on-ticket-transition.sh"
+
+run_transition_hook() {
+    local ticket_path="$1"
+    local new_state="$2"
+
+    if [ -f "$TRANSITION_HOOK" ] && ! bash "$TRANSITION_HOOK" "$ticket_path" "$new_state"; then
+        echo "Warning: Ticket transition hook failed for ${ticket_path} (${new_state})." >&2
+    fi
+}
 
 echo "Kanban worker started; watching /kanban/2-ready-for-work for tickets."
 
@@ -83,6 +93,7 @@ while true; do
     worklog_path="/kanban/worklogs/$(basename "${in_progress_path%.md}").log"
     echo "Ready for work: ${ticket_path}"
     mv -- "$ticket_path" "$in_progress_path"
+    run_transition_hook "$in_progress_path" "in-progress"
     echo "In progress: ${in_progress_path}"
     echo "Using model ${OPENCODE_MODEL} with variant ${OPENCODE_VARIANT}."
     echo "Writing OpenCode output to: ${worklog_path}"
@@ -90,12 +101,16 @@ while true; do
     if opencode run --model "$OPENCODE_MODEL" --variant "$OPENCODE_VARIANT" "Please implement the ticket in ${in_progress_path}. If the ticket has a task list, please implement each task one at a time. When finished, save important implementation notes in the ticket's Notes section." 2>&1 | tee "$worklog_path"; then
         echo "Completed ticket: ${in_progress_path}"
         echo "Moving ticket to review: ${in_progress_path}"
-        mv -- "$in_progress_path" /kanban/4-in-review/
-        echo "In review: /kanban/4-in-review/$(basename "$in_progress_path")"
+        in_review_path="/kanban/4-in-review/$(basename "$in_progress_path")"
+        mv -- "$in_progress_path" "$in_review_path"
+        run_transition_hook "$in_review_path" "in-review"
+        echo "In review: ${in_review_path}"
     else
         echo "OpenCode failed while processing ticket; returning it to ready for work: ${in_progress_path}" >&2
-        mv -- "$in_progress_path" /kanban/2-ready-for-work/
-        echo "Ready for work: /kanban/2-ready-for-work/$(basename "$in_progress_path")"
+        ready_path="/kanban/2-ready-for-work/$(basename "$in_progress_path")"
+        mv -- "$in_progress_path" "$ready_path"
+        run_transition_hook "$ready_path" "ready-for-work"
+        echo "Ready for work: ${ready_path}"
         echo "Retrying in 10 seconds."
     fi
 done

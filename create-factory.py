@@ -65,6 +65,19 @@ def main():
         with open(config_path, "w", encoding="utf-8", newline="\n") as config_file:
             config_file.write("OPENCODE_MODEL=\nOPENCODE_VARIANT=\n")
 
+    transition_hook_path = os.path.join(kanban_path, "on-ticket-transition.sh")
+    if not os.path.exists(transition_hook_path):
+        with open(transition_hook_path, "w", encoding="utf-8", newline="\n") as hook_file:
+            hook_file.write(
+                "#!/bin/bash\n"
+                "\n"
+                "# Called after a ticket moves to a new state.\n"
+                "ticket_path=\"$1\"\n"
+                "new_state=\"$2\"\n"
+                "\n"
+                "# Add custom transition actions here.\n"
+            )
+
     volume_prefix = f"dark-factory-{args.name}"
 
     cmd = [
