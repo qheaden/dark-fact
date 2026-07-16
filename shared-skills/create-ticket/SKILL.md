@@ -15,5 +15,7 @@ description: Create a ticket to add to the Kanban board. Use whenever the user a
 
 - Build a new ticket based on the template in "assets/TICKET-TEMPLATE.md"
 - Before saving the ticket, show a draft to the user and ask if they want anything adjusted
+- Prefix the ticket filename with the next three-digit, zero-padded ticket number, such as `001-ticket-name.md` or `002-ticket-name.md`
+- Determine the next number by checking ticket filenames only in `/kanban/2-ready-for-work`, incrementing the highest existing three-digit prefix, and starting at `001` if no numbered tickets exist
 - After the user finally approves the ticket, save it to "/kanban" folder under the "2-ready-for-work" subdirectory
 - Ask the user if they want to create a new ticket, and if so, go back to step 1.
