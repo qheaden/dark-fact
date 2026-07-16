@@ -6,7 +6,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     ca-certificates \
     sudo \
-    git
+    git \
+    jq
 
 COPY --chmod=0444 ssl-certs/* /usr/local/share/ca-certificates/
 

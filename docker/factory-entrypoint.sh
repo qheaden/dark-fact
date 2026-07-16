@@ -44,7 +44,7 @@ if [ -f /home/opencode/.env ]; then
 fi
 
 shopt -s nullglob
-FACTORY_CONFIG="/kanban/factory.env"
+FACTORY_CONFIG="/kanban/factory-config.json"
 TRANSITION_HOOK="/kanban/on-ticket-transition.sh"
 
 run_transition_hook() {
@@ -66,18 +66,30 @@ while true; do
         continue
     fi
 
-    unset OPENCODE_MODEL OPENCODE_VARIANT
-    if ! source "$FACTORY_CONFIG"; then
-        echo "Error: Could not load factory configuration: ${FACTORY_CONFIG}. Waiting 10 seconds." >&2
+    if ! config_json=$(jq -ce '
+        if type == "object"
+            and (.modelId | type == "string")
+            and (.reasoningLevel | type == "string")
+            and (.enabled | type == "boolean")
+        then .
+        else error("expected an object with string modelId, string reasoningLevel, and boolean enabled properties")
+        end
+    ' "$FACTORY_CONFIG"); then
+        echo "Error: Invalid factory configuration: ${FACTORY_CONFIG}. Waiting 10 seconds." >&2
         continue
     fi
 
-    # Factory configuration may be edited on Windows with CRLF line endings.
-    OPENCODE_MODEL="${OPENCODE_MODEL%$'\r'}"
-    OPENCODE_VARIANT="${OPENCODE_VARIANT%$'\r'}"
+    model_id=$(jq -r '.modelId' <<< "$config_json")
+    reasoning_level=$(jq -r '.reasoningLevel' <<< "$config_json")
+    enabled=$(jq -r '.enabled' <<< "$config_json")
 
-    if [ -z "$OPENCODE_MODEL" ] || [ -z "$OPENCODE_VARIANT" ]; then
-        echo "Error: ${FACTORY_CONFIG} must define non-empty OPENCODE_MODEL and OPENCODE_VARIANT values. Waiting 10 seconds." >&2
+    if [ "$enabled" != "true" ]; then
+        echo "Factory is paused; checking again in 10 seconds."
+        continue
+    fi
+
+    if [ -z "$model_id" ] || [ -z "$reasoning_level" ]; then
+        echo "Error: ${FACTORY_CONFIG} must define non-empty modelId and reasoningLevel values. Waiting 10 seconds." >&2
         continue
     fi
 
@@ -95,7 +107,7 @@ while true; do
     mv -- "$ticket_path" "$in_progress_path"
     run_transition_hook "$in_progress_path" "in-progress"
     echo "In progress: ${in_progress_path}"
-    echo "Using model ${OPENCODE_MODEL} with variant ${OPENCODE_VARIANT}."
+    echo "Using model ${model_id} with reasoning level ${reasoning_level}."
     echo "Writing OpenCode output to: ${worklog_path}"
 
     prompt="Please implement the ticket in ${in_progress_path}.
@@ -106,7 +118,7 @@ If the ticket has a task list, please implement each task one at a time.
 
 When finished, save important implementation notes in the ticket's Notes section and update /kanban/MEMORIES.md with any relevant information that should carry forward to future ticket work."
 
-    if opencode run --model "$OPENCODE_MODEL" --variant "$OPENCODE_VARIANT" "$prompt" 2>&1 | tee "$worklog_path"; then
+    if opencode run --model "$model_id" --variant "$reasoning_level" "$prompt" 2>&1 | tee "$worklog_path"; then
         echo "Completed ticket: ${in_progress_path}"
         echo "Moving ticket to review: ${in_progress_path}"
         in_review_path="/kanban/4-in-review/$(basename "$in_progress_path")"

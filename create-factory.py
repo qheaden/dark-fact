@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import json
 import os
 import subprocess
 import sys
@@ -60,10 +61,15 @@ def main():
     ):
         os.makedirs(os.path.join(kanban_path, state), exist_ok=True)
 
-    config_path = os.path.join(kanban_path, "factory.env")
+    config_path = os.path.join(kanban_path, "factory-config.json")
     if not os.path.exists(config_path):
         with open(config_path, "w", encoding="utf-8", newline="\n") as config_file:
-            config_file.write("OPENCODE_MODEL=\nOPENCODE_VARIANT=\n")
+            json.dump(
+                {"modelId": "", "reasoningLevel": "", "enabled": True},
+                config_file,
+                indent=2,
+            )
+            config_file.write("\n")
 
     memories_path = os.path.join(kanban_path, "MEMORIES.md")
     if not os.path.exists(memories_path):
