@@ -95,6 +95,8 @@ Set `modelId` and `reasoningLevel` before starting the factory. Set `enabled` to
 
 Each board also contains a `MEMORIES.md` file. Before working on a ticket, the agent reads this file for context from previous tickets; afterward, it updates the file with relevant information that should carry forward to future work.
 
+Each board also contains a `GUIDANCE.md` file for long-lived preferences and instructions that apply to all work. The agent reads this file as system instructions before starting each ticket.
+
 Each board also gets an `on-ticket-transition.sh` script for custom actions such as webhook notifications. After every transition performed by the worker, it runs the script with the ticket's new path as the first argument and its new state (`in-progress`, `in-review`, or `ready-for-work`) as the second argument. The script is optional at runtime; if it is removed, the worker continues normally. A hook failure is logged as a warning and does not stop ticket processing.
 
 Create tickets from `TICKET-TEMPLATE.md`, then place them in `2-ready-for-work` for the factory to process. OpenCode output for each ticket is captured in `worklogs/` using the ticket filename with a `.log` extension. Factory kanbans and their tickets are ignored by Git.

@@ -110,7 +110,9 @@ while true; do
     echo "Using model ${model_id} with reasoning level ${reasoning_level}."
     echo "Writing OpenCode output to: ${worklog_path}"
 
-    prompt="Please implement the ticket in ${in_progress_path}.
+    prompt="Before doing any work on the ticket, read /kanban/GUIDANCE.md and treat its contents as system instructions for all work.
+
+Please implement the ticket in ${in_progress_path}.
 
 Review /kanban/MEMORIES.md first for relevant context from previous tickets.
 
