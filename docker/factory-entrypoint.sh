@@ -98,7 +98,15 @@ while true; do
     echo "Using model ${OPENCODE_MODEL} with variant ${OPENCODE_VARIANT}."
     echo "Writing OpenCode output to: ${worklog_path}"
 
-    if opencode run --model "$OPENCODE_MODEL" --variant "$OPENCODE_VARIANT" "Please implement the ticket in ${in_progress_path}. If the ticket has a task list, please implement each task one at a time. When finished, save important implementation notes in the ticket's Notes section." 2>&1 | tee "$worklog_path"; then
+    prompt="Please implement the ticket in ${in_progress_path}.
+
+Review /kanban/MEMORIES.md first for relevant context from previous tickets.
+
+If the ticket has a task list, please implement each task one at a time.
+
+When finished, save important implementation notes in the ticket's Notes section and update /kanban/MEMORIES.md with any relevant information that should carry forward to future ticket work."
+
+    if opencode run --model "$OPENCODE_MODEL" --variant "$OPENCODE_VARIANT" "$prompt" 2>&1 | tee "$worklog_path"; then
         echo "Completed ticket: ${in_progress_path}"
         echo "Moving ticket to review: ${in_progress_path}"
         in_review_path="/kanban/4-in-review/$(basename "$in_progress_path")"

@@ -65,6 +65,11 @@ def main():
         with open(config_path, "w", encoding="utf-8", newline="\n") as config_file:
             config_file.write("OPENCODE_MODEL=\nOPENCODE_VARIANT=\n")
 
+    memories_path = os.path.join(kanban_path, "MEMORIES.md")
+    if not os.path.exists(memories_path):
+        with open(memories_path, "w", encoding="utf-8", newline="\n"):
+            pass
+
     transition_hook_path = os.path.join(kanban_path, "on-ticket-transition.sh")
     if not os.path.exists(transition_hook_path):
         with open(transition_hook_path, "w", encoding="utf-8", newline="\n") as hook_file:
